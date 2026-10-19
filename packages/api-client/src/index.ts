@@ -31,6 +31,16 @@ export class ApiClient {
     return response.json() as Promise<T>;
   }
   async download(path:string):Promise<Blob> {return (await this.response(path)).blob();}
+  /** Generic JSON-over-SSE stream for endpoints whose events end with a `done` or `error` frame. */
+  async *streamEvents<T extends {type:string}>(path:string,body:unknown,signal?:AbortSignal):AsyncGenerator<T> {
+    const response=await this.response(path,{method:'POST',body,signal,headers:{Accept:'text/event-stream'}});
+    if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream')) throw new ApiError(502,'INVALID_STREAM','The server did not return an event stream.');
+    for await (const frame of parseSSE(response.body)) {
+      let event:T;
+      try {event=JSON.parse(frame.data) as T;} catch {throw new ApiError(502,'INVALID_STREAM','A stream event could not be decoded.');}
+      if (event && typeof event.type==='string') yield event;
+    }
+  }
   async *streamMessage(conversationId:string,input:SendMessageInput,signal?:AbortSignal):AsyncGenerator<StreamEvent> {
     const response=await this.response(`/conversations/${encodeURIComponent(conversationId)}/messages`,{method:'POST',body:input,signal,headers:{Accept:'text/event-stream'}});
     if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream')) throw new ApiError(502,'INVALID_STREAM','The server did not return an event stream.');

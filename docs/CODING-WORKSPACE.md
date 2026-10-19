@@ -52,6 +52,19 @@ The runner uses a non-root user, no network, no host mounts or application crede
 
 The default image includes Node and npm. Dependencies are not automatically installed; network access is disabled, and `node_modules` is excluded from project imports. Builds needing packages or pnpm require an operator-prepared image with the necessary tools and dependencies available. The terminal is not an unrestricted host shell. To iterate after a test failure, start another coding task: it receives the latest three recorded command outputs, capped at 4,000 characters each. It does not automatically rerun tests.
 
+## Local agent (live folder)
+
+**Local agent** in the activity bar works directly on a folder on the API computer, like a terminal coding agent. It does not import or snapshot the project. Bind a folder inside one of your `CODING_LOCAL_PROJECTS` roots. The binding is kept in API memory for the session and is forgotten when the API restarts.
+
+- On bind, the agent pins `CLAUDE.md` (or `AGENTS.md`) as standing instructions, capped at 8,000 characters. It also sees the top-level file names. Nothing else is read until the model calls a tool.
+- Read tools: `list_dir`, `read_file` (line ranges), `search_text` (with glob), and read-only `git_status` and `git_diff`. Results are capped. `node_modules`, `.git`, `dist`, `build` and similar directories are skipped. `.env*`, keys and credential files are hidden and denied unless you add an explicit allow-read rule, or confirm when adding one with **Add to context**.
+- Paths must be relative. `..`, absolute paths and links whose real location leaves the folder are rejected.
+- `edit_file` replaces exactly one occurrence of the expected text and fails if the text is missing or not unique. `write_file` creates or overwrites a file. Both show a diff card and wait for **Accept**, unless a session rule allows edits for that path, for example `src/`. Accept writes only if the file is unchanged since the diff was made. `delete_file` and commands always ask per call.
+- Commands are disabled unless the operator sets `CODING_WORKSPACE_COMMANDS=true`. Approved commands are limited to npm, pnpm, yarn, npx and node. Arguments may not contain shell syntax. Commands run on the host in the bound folder, with sensitive environment variables removed, and with a two-minute timeout.
+- When a tool fails, the error goes back to the model and the turn stops. Use **Continue** after deciding on pending changes.
+
+The Docker Compose API cannot see host folders. Run the API on the host (`pnpm dev`) to use Local agent, or mount the folder into the API container and configure a matching root.
+
 ## Current boundaries
 
 - Source snapshots support up to 200 text files, 100 KiB per file and 2 MiB total. Large repositories need a smaller selected source folder.

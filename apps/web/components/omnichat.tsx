@@ -12,6 +12,7 @@ import {useUi,type Workspace} from '@/lib/store';
 import {AuthDialog} from './auth';
 import {Chat} from './chat';
 import {CodingWorkspace,CodingWelcome} from './coding-workspace';
+import {LocalWorkspace} from './local-workspace';
 import {ModelBrowser,ModelPicker} from './models';
 import {ConversationSettings,SettingsDialog} from './settings';
 import {Connection,FilesWorkspace,SearchWorkspace,SignedOutWorkspace,Studio,WorkspaceHeading} from './workspaces';
@@ -79,7 +80,7 @@ export function OmniChat(){
    {id:'connection',label:'AI: Gateway connection',run:()=>setWorkspace('status')},
    ...(workspace==='chat'||(workspace==='projects'&&coding.ready)?[{id:'sidebar',label:'View: Toggle sidebar',shortcut:'Ctrl / ⌘ B',run:toggleContextSidebar}]:[]),
    {id:'settings',label:'Preferences: Open settings',run:()=>requireAuth()&&setSettingsOpen(true)},
-   ...(['images','video','music','search','files'] as Workspace[]).map(id=>({id,label:`View: ${workspaceLabels[id]}`,run:()=>setWorkspace(id)})),
+   ...(['agent','images','video','music','search','files'] as Workspace[]).map(id=>({id,label:`View: ${workspaceLabels[id]}`,run:()=>setWorkspace(id)})),
    ...(coding.ready?[
      {id:'quick',label:'File: Quick open',shortcut:'Ctrl / ⌘ P',run:()=>setPalette('files')},
      {id:'search-project',label:'Search: Current project files',run:()=>{setWorkspace('projects');coding.showSearch();}},
@@ -93,7 +94,7 @@ export function OmniChat(){
  const quickFiles:IdeCommand[]=coding.files.map(file=>({id:file.path,label:file.path,detail:coding.projectName,run:()=>{setWorkspace('projects');coding.openFile(file.path);}}));
  const connectionLabel=!user?'Sign in to connect':connection?.status==='connected'?'Gateway connected':connection?.status==='unconfigured'?'Gateway not configured':connection?.status==='disconnected'?'Gateway disconnected':'Checking connection';
  const selectedModel=registry.data?.models.find(model=>model.id===modelId);
- const extraWorkspace=(id:Workspace)=>!user?<SignedOutWorkspace onSignIn={()=>setAuthOpen(true)}/>:id==='models'?<div className="workspace-content"><WorkspaceHeading eyebrow="OMNIROUTE INTEGRATIONS" title="Find your thinking partner." description="Models and capabilities reported by your connected gateway." action={<button className="button secondary" onClick={()=>refresh.mutate()} disabled={refresh.isPending}>Refresh discovery</button>}/><ErrorNotice message={registry.error&&errorMessage(registry.error)}/><ModelBrowser registry={registry.data} settings={settings.data} onSelect={()=>setWorkspace('chat')}/></div>:id==='status'?<Connection registry={registry.data} refreshing={refresh.isPending||registry.isFetching} onRefresh={()=>refresh.mutate()} error={refresh.error||registry.error}/>:id==='files'?<FilesWorkspace/>:id==='search'?<SearchWorkspace registry={registry.data}/>:<div className="studio-container">{['music','speech','transcription'].includes(id)&&<div className="studio-tabs">{(['music','speech','transcription'] as const).map(kind=><button className={id===kind?'active':''} onClick={()=>setWorkspace(kind)} key={kind}>{workspaceLabels[kind]}</button>)}</div>}<Studio kind={id as 'images'|'video'|'music'|'speech'|'transcription'} registry={registry.data}/></div>;
+ const extraWorkspace=(id:Workspace)=>!user?<SignedOutWorkspace onSignIn={()=>setAuthOpen(true)}/>:id==='models'?<div className="workspace-content"><WorkspaceHeading eyebrow="OMNIROUTE INTEGRATIONS" title="Find your thinking partner." description="Models and capabilities reported by your connected gateway." action={<button className="button secondary" onClick={()=>refresh.mutate()} disabled={refresh.isPending}>Refresh discovery</button>}/><ErrorNotice message={registry.error&&errorMessage(registry.error)}/><ModelBrowser registry={registry.data} settings={settings.data} onSelect={()=>setWorkspace('chat')}/></div>:id==='status'?<Connection registry={registry.data} refreshing={refresh.isPending||registry.isFetching} onRefresh={()=>refresh.mutate()} error={refresh.error||registry.error}/>:id==='agent'?<LocalWorkspace registry={registry.data}/>:id==='files'?<FilesWorkspace/>:id==='search'?<SearchWorkspace registry={registry.data}/>:<div className="studio-container">{['music','speech','transcription'].includes(id)&&<div className="studio-tabs">{(['music','speech','transcription'] as const).map(kind=><button className={id===kind?'active':''} onClick={()=>setWorkspace(kind)} key={kind}>{workspaceLabels[kind]}</button>)}</div>}<Studio kind={id as 'images'|'video'|'music'|'speech'|'transcription'} registry={registry.data}/></div>;
  return <div className="ide-shell" style={{'--conversation-sidebar-width':`${sidebarWidth}px`} as CSSProperties}>
    <a className="skip-link" href="#main-content">Skip to content</a>
    <header className="ide-titlebar">

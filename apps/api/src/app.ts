@@ -20,6 +20,7 @@ import { registerGenerations } from './generations.js';
 import { registerCodingLocal } from './coding-local.js';
 import { registerCodingCommands } from './coding-executor.js';
 import { registerCoding } from './coding.js';
+import { registerWorkspace } from './workspace.js';
 
 export type Context = {db:PrismaClient;gateway:OmniRoute;config:AppConfig;active:Map<string,AbortController>};
 const idParams=z.object({id:z.string().uuid()});
@@ -159,7 +160,7 @@ export async function buildApp(options:{db?:PrismaClient;gateway?:OmniRoute;conf
   });
   app.delete('/api/attachments/:id',async request=>{const {userId}=await authenticate(request,db);const row=await db.attachment.findFirst({where:{id:idOf(request),userId}});if(!row)throw new HttpError(404,'NOT_FOUND','Attachment not found.');await db.attachment.delete({where:{id:row.id}});await unlink(join(config.uploadDir,row.storageKey)).catch(()=>{});return {ok:true};});
   app.post('/api/search',{config:{rateLimit:{max:20,timeWindow:60_000}}},async request=>{await authenticate(request,db);const body=z.object({query:z.string().trim().min(1).max(500),modelId:z.string().optional()}).parse(request.body);return {results:await gateway.search(body.query)};});
-  registerChat(app,ctx);registerGenerations(app,ctx);registerCodingLocal(app,ctx);registerCoding(app,ctx);registerCodingCommands(app,ctx);
+  registerChat(app,ctx);registerGenerations(app,ctx);registerCodingLocal(app,ctx);registerCoding(app,ctx);registerCodingCommands(app,ctx);registerWorkspace(app,ctx);
   app.addHook('onClose',async()=>{for(const controller of ctx.active.values())controller.abort();if(!options.db)await db.$disconnect();});
   return app;
 }
