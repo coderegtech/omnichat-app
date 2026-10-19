@@ -1,0 +1,1 @@
+module.exports = { content: ['./App.tsx', './src/**/*.{ts,tsx}'], presets: [require('nativewind/preset')], darkMode: 'class', theme: { extend: { colors: { ink: '#101214', panel: '#191c20', mint: '#9de3ce' } } }, plugins: [] };

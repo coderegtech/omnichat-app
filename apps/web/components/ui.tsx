@@ -1,0 +1,17 @@
+'use client';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import {Check, ChevronDown, LoaderCircle, MoreHorizontal, X} from 'lucide-react';
+import {useState} from 'react';
+
+export function Modal({open,onOpenChange,title,description,children,wide=false}:{open:boolean;onOpenChange:(open:boolean)=>void;title:string;description?:string;children:React.ReactNode;wide?:boolean}) {
+ return <Dialog.Root open={open} onOpenChange={onOpenChange}><Dialog.Portal><Dialog.Overlay className="modal-overlay"/><Dialog.Content className={`modal ${wide?'modal-wide':''}`}><div className="modal-heading"><div><Dialog.Title>{title}</Dialog.Title><Dialog.Description className={description?'muted':'sr-only'}>{description||title}</Dialog.Description></div><Dialog.Close className="icon-button" aria-label="Close dialog"><X size={19}/></Dialog.Close></div>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>;
+}
+export function Menu({children,label='More options'}:{children:React.ReactNode;label?:string}) {return <DropdownMenu.Root><DropdownMenu.Trigger className="icon-button" aria-label={label}><MoreHorizontal size={17}/></DropdownMenu.Trigger><DropdownMenu.Portal><DropdownMenu.Content className="dropdown" align="end" sideOffset={6}>{children}</DropdownMenu.Content></DropdownMenu.Portal></DropdownMenu.Root>;}
+export function MenuItem({children,onSelect,danger=false}:{children:React.ReactNode;onSelect:()=>void;danger?:boolean}) {return <DropdownMenu.Item className={`menu-item ${danger?'danger':''}`} onSelect={onSelect}>{children}</DropdownMenu.Item>;}
+export function Field({label,children,hint}:{label:string;children:React.ReactNode;hint?:string}) {return <label className="field"><span>{label}</span>{children}{hint&&<small className="muted">{hint}</small>}</label>;}
+export function Select({label,value,onChange,children,disabled=false}:{label:string;value:string;onChange:(v:string)=>void;children:React.ReactNode;disabled?:boolean}) {return <span className="select-wrap"><select aria-label={label} value={value} onChange={e=>onChange(e.target.value)} disabled={disabled}>{children}</select><ChevronDown size={14}/></span>;}
+export function Busy({label='Loading'}:{label?:string}) {return <span className="busy"><LoaderCircle size={16} className="spin"/>{label}</span>;}
+export function ErrorNotice({message}:{message:string|null|undefined}) {return message?<div role="alert" className="error-notice">{message}</div>:null;}
+export function CopyButton({text,label='Copy'}:{text:string;label?:string}) {const [copied,setCopied]=useState(false);return <button className="text-button" onClick={async()=>{try{await navigator.clipboard.writeText(text);setCopied(true);setTimeout(()=>setCopied(false),1600);}catch{setCopied(false);}}}>{copied?<><Check size={14}/>Copied</>:label}</button>;}
+export function Brand({small=false}:{small?:boolean}) {return <span className={`brand ${small?'brand-small':''}`}><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 3.5 26.8 9.8v12.4L16 28.5 5.2 22.2V9.8L16 3.5Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/><path d="m16 9 6 3.5v7L16 23l-6-3.5v-7L16 9Z" stroke="currentColor" strokeWidth="2.3"/><path d="M16 3.5V9m10.8.8L22 12.5m4.8 9.7L22 19.5M16 28.5V23M5.2 22.2l4.8-2.7M5.2 9.8l4.8 2.7" stroke="currentColor" strokeWidth="2.2"/></svg>{!small&&<span>omni<span className="brand-light">chat</span><span className="brand-dot">.</span></span>}</span>;}

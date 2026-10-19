@@ -1,0 +1,53 @@
+{
+  "name": "@omnichat/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build": "expo export --platform android --platform ios",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --runInBand",
+    "doctor": "expo install --check"
+  },
+  "dependencies": {
+    "@omnichat/api-client": "workspace:*",
+    "@omnichat/types": "workspace:*",
+    "@tanstack/react-query": "5.80.2",
+    "zustand": "5.0.5",
+    "expo": "55.0.31",
+    "react": "19.2.0",
+    "react-native": "0.83.10",
+    "expo-dev-client": "55.0.40",
+    "expo-secure-store": "55.0.18",
+    "expo-haptics": "55.0.18",
+    "expo-clipboard": "55.0.17",
+    "expo-crypto": "55.0.19",
+    "expo-document-picker": "55.0.17",
+    "expo-file-system": "55.0.26",
+    "expo-sharing": "55.0.24",
+    "expo-status-bar": "55.0.6",
+    "nativewind": "4.2.7",
+    "moti": "0.30.0",
+    "react-native-reanimated": "4.2.1",
+    "react-native-worklets": "0.7.4",
+    "react-native-gesture-handler": "2.30.0",
+    "react-native-safe-area-context": "5.6.2",
+    "react-native-markdown-display": "7.0.2",
+    "react-native-css-interop": "0.2.7"
+  },
+  "devDependencies": {
+    "@babel/core": "7.27.4",
+    "babel-preset-expo": "55.0.25",
+    "@types/react": "19.2.0",
+    "typescript": "5.8.3",
+    "tailwindcss": "3.4.17",
+    "jest": "29.7.0",
+    "jest-expo": "55.0.22",
+    "@types/jest": "29.5.14",
+    "@testing-library/react-native": "13.2.0",
+    "react-test-renderer": "19.2.0"
+  }
+}

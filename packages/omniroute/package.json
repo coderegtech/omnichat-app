@@ -1,0 +1,1 @@
+{"name":"@omnichat/omniroute","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts","scripts":{"typecheck":"tsc --noEmit","test":"vitest run --root ../.. packages/omniroute"},"dependencies":{"@omnichat/core":"workspace:*","@omnichat/types":"workspace:*"},"devDependencies":{"typescript":"^5.9.3","vitest":"^3.2.4","@types/node":"^22.18.0"}}

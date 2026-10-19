@@ -1,0 +1,3 @@
+:root{--oc-bg:#101413;--oc-surface:#181e1c;--oc-elevated:#212a26;--oc-border:#2b3731;--oc-text:#eef2ee;--oc-muted:#9daaa2;--oc-accent:#b2e7cc;--oc-danger:#f2a6a0;--oc-radius:14px;--oc-motion:220ms}
+[data-theme=light]{--oc-bg:#f7f9f6;--oc-surface:#ffffff;--oc-elevated:#edf2ec;--oc-border:#d9e2d8;--oc-text:#18251d;--oc-muted:#5c6e61;--oc-accent:#246447;--oc-danger:#b23434}
+@media(prefers-reduced-motion:reduce){:root{--oc-motion:0ms}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

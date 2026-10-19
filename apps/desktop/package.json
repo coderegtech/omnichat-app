@@ -1,0 +1,7 @@
+{
+  "name": "@omnichat/desktop", "version": "0.1.0", "private": true,
+  "description": "OmniChat secure desktop shell", "author": "OmniChat contributors", "main": "dist/main.cjs",
+  "scripts": { "dev": "pnpm build && electron .", "build": "node build.mjs", "typecheck": "tsc --noEmit", "test": "node --experimental-strip-types --test tests/security.test.ts", "test:smoke": "playwright test", "package": "pnpm build && electron-builder --dir", "dist": "pnpm build && electron-builder" },
+  "devDependencies": { "electron": "43.7.11", "electron-builder": "26.0.12", "esbuild": "0.25.5", "typescript": "5.8.3", "@types/node": "22.15.29", "@playwright/test": "1.55.1" },
+  "build": { "appId": "app.omnichat.desktop", "productName": "OmniChat", "asar": true, "directories": { "output": "release" }, "files": ["dist/**/*", "package.json"], "win": { "target": ["nsis"] }, "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }, "mac": { "target": ["dmg", "zip"], "category": "public.app-category.productivity", "hardenedRuntime": true }, "linux": { "target": ["AppImage", "deb"], "category": "Office" } }
+}

@@ -1,0 +1,81 @@
+name: omnichat
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-omnichat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-omnichat}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    command: [pnpm, --filter, '@omnichat/database', migrate]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-omnichat}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-omnichat}?schema=public
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: 'no'
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-omnichat}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-omnichat}?schema=public
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:3210}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_DAYS: ${SESSION_DAYS:-30}
+      OMNIROUTE_BASE_URL: ${DOCKER_OMNIROUTE_BASE_URL:-http://host.docker.internal:20128/v1}
+      OMNIROUTE_API_KEY: ${OMNIROUTE_API_KEY:-}
+      OMNIROUTE_ALLOW_NO_AUTH: ${OMNIROUTE_ALLOW_NO_AUTH:-false}
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - attachments:/data/uploads
+    ports:
+      - "127.0.0.1:${API_PORT:-4010}:4000"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:4000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:4000
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3210}:3000"
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres-data:
+  attachments:

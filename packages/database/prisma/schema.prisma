@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  sessions     Session[]
+  conversations Conversation[]
+  folders      ConversationFolder[]
+  settings     UserSettings?
+  attachments  Attachment[]
+  jobs         GenerationJob[]
+  usage        UsageRecord[]
+  audits       AuditEvent[]
+  projects     CodingProject[]
+}
+
+model Session {
+  id        String @id @default(uuid())
+  tokenHash String @unique
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+
+model Conversation {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String @default("New conversation")
+  modelId String?
+  systemPrompt String?
+  temperature Float?
+  maxTokens Int?
+  pinned Boolean @default(false)
+  folderId String?
+  folder ConversationFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  messages Message[]
+  @@index([userId, deletedAt, updatedAt])
+}
+
+model Message {
+  id String @id @default(uuid())
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  parentId String?
+  parent Message? @relation("MessageTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Message[] @relation("MessageTree")
+  role String
+  content String @default("")
+  modelId String?
+  status String @default("pending")
+  requestId String?
+  error String?
+  inputTokens Int?
+  outputTokens Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attachments Attachment[]
+  @@unique([conversationId, requestId])
+  @@index([conversationId, createdAt])
+}
+
+model ConversationFolder {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  conversations Conversation[]
+  @@index([userId])
+}
+
+model UserSettings {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme String @default("dark")
+  defaultModel String?
+  favoriteModels String[] @default([])
+  systemPrompt String @default("")
+  streaming Boolean @default(true)
+  animations Boolean @default(true)
+  temperature Float?
+  maxTokens Int?
+}
+
+model Attachment {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  mimeType String
+  size Int
+  storageKey String @unique
+  extractedText String?
+  createdAt DateTime @default(now())
+  messages Message[]
+  @@index([userId, createdAt])
+}
+
+model GenerationJob {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId String
+  kind String
+  modelId String
+  prompt String
+  options Json @default("{}")
+  status String @default("queued")
+  error String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assets GeneratedAsset[]
+  @@unique([userId, requestId])
+  @@index([userId, createdAt])
+}
+
+model GeneratedAsset {
+  id String @id @default(uuid())
+  jobId String
+  job GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  url String
+  mimeType String
+}
+
+model UsageRecord {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modelId String
+  messageId String @unique
+  inputTokens Int?
+  outputTokens Int?
+  createdAt DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model AuditEvent {
+  id String @id @default(uuid())
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action String
+  createdAt DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model CodingProject {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  description String @default("")
+  source String @default("imported")
+  localPath String? @unique
+  localManifest Json @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  files CodingFile[]
+  runs CodingRun[]
+  commands CodingCommand[]
+  @@index([userId, updatedAt])
+}
+
+model CodingFile {
+  id String @id @default(uuid())
+  projectId String
+  project CodingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  path String
+  content String
+  revision Int @default(1)
+  updatedAt DateTime @updatedAt
+  @@unique([projectId, path])
+}
+
+model CodingRun {
+  id String @id @default(uuid())
+  projectId String
+  project CodingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestId String
+  prompt String
+  modelId String
+  status String @default("running")
+  summary String @default("")
+  actions Json @default("[]")
+  error String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([projectId, requestId])
+  @@index([projectId, createdAt])
+}
+
+model CodingCommand {
+  id String @id @default(uuid())
+  projectId String
+  project CodingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestId String
+  program String
+  args Json
+  status String @default("queued")
+  output String @default("")
+  exitCode Int?
+  error String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([projectId, requestId])
+  @@index([projectId, createdAt])
+}

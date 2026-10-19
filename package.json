@@ -1,0 +1,63 @@
+{
+  "name": "omnichat",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "dev:web": "pnpm --filter @omnichat/web dev",
+    "dev:api": "node --env-file-if-exists=.env --import tsx --watch apps/api/src/index.ts",
+    "dev:mobile": "node scripts/workspace-command.mjs dev:mobile",
+    "dev:desktop": "node scripts/workspace-command.mjs dev:desktop",
+    "build": "node scripts/workspace-command.mjs build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:live": "node --env-file-if-exists=.env scripts/live-discovery.mjs",
+    "db:generate": "node scripts/workspace-command.mjs db:generate",
+    "db:migrate": "node scripts/workspace-command.mjs db:migrate",
+    "db:seed": "node scripts/workspace-command.mjs db:seed",
+    "test:integration": "node scripts/workspace-command.mjs test:integration",
+    "db:test:migrate": "node scripts/workspace-command.mjs db:test:migrate"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "@types/node": "^22.19.0",
+    "@playwright/test": "^1.56.1",
+    "tsx": "^4.20.6",
+    "dotenv": "^17.2.3",
+    "jsdom": "^26.1.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "6.9.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "sharp",
+      "electron",
+      "@swc/core"
+    ],
+    "overrides": {
+      "deepmerge-ts": "^8.0.0",
+      "katex": "^0.19.0",
+      "effect": "^3.20.0",
+      "@babel/core": "^7.29.6",
+      "postcss-selector-parser": "^7.1.6",
+      "xcode>uuid": "^11.1.1",
+      "markdown-it": "^14.3.1",
+      "postcss": "^8.5.23",
+      "linkify-it": "^5.0.2"
+    }
+  }
+}

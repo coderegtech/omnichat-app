@@ -1,0 +1,1 @@
+{ "extends": "expo/tsconfig.base", "compilerOptions": { "strict": true, "jsx": "react-jsx", "types": ["nativewind/types", "jest"], "paths": { "@omnichat/api-client": ["../../packages/api-client/src/index.ts"], "@omnichat/types": ["../../packages/types/src/index.ts"] } }, "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"] }
