@@ -29,6 +29,8 @@ pnpm dev
 
 Open **http://localhost:3210** and create your own account. The local API runs on port **4010**, PostgreSQL on **55432**. These ports avoid common development defaults and can be changed in `.env`. No default user/password is installed. Registration is intended for a trusted deployment; restrict network access or implement an invitation policy before opening registration to the public.
 
+For day-to-day start, restart and stop commands, in both Docker and host development modes, see [Starting and restarting](docs/RUNNING.md).
+
 Keep PostgreSQL running between sessions for persistent history. Stop this stack with `docker compose down`; keep its named volume to retain data. Do not add `--volumes` unless you intend to erase the database and uploaded attachments.
 
 ## Applications and packages
@@ -68,6 +70,7 @@ See [verification results](docs/VERIFICATION.md) for what actually passed on thi
 
 ## Deployment and platform builds
 
+- [Starting, restarting and stopping](docs/RUNNING.md)
 - [Docker and production deployment](docs/DEPLOYMENT.md)
 - [Mobile and desktop development / packaging](docs/PLATFORMS.md)
 - [Installed OmniRoute compatibility and unavailable features](docs/OMNIROUTE-COMPATIBILITY.md)
