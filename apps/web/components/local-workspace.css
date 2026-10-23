@@ -101,6 +101,56 @@
 .lw-rule-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .lw-rule-form input{flex:1;min-width:140px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--text)}
 .lw-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.lw-start{flex:1;min-width:0;overflow:auto}
+.lw-projects{width:235px;flex:none;border-right:1px solid var(--line);background:var(--sidebar);padding:8px;display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
+.lw-projects input,.lw-panel-toolbar input,.lw-git-actions input{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--text);font:inherit;font-size:12px}
+.lw-project-list{overflow:auto;min-height:0}
+.lw-project-title{display:flex;align-items:center;gap:6px;font-size:12px;padding:8px 0}
+.lw-project-title strong{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-chat-link{display:flex;border-radius:6px;align-items:center;padding:2px}
+.lw-chat-link.selected{background:var(--panel-hover)}
+.lw-chat-link>button:first-child{display:flex;gap:6px;align-items:center;flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--text);padding:7px 3px;font-size:12px;cursor:pointer}
+.lw-chat-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-chat-link svg{flex:none}
+.lw-tools{flex:1;min-width:280px;display:flex;flex-direction:column;overflow:auto;border-left:1px solid var(--line);background:var(--panel)}
+.lw-tools>.lw-tree{flex:0 1 auto;max-height:240px;min-height:80px}
+.lw-panel-toolbar{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lw-panel-toolbar>button[role=tab]{border:0;background:none;color:var(--muted);padding:6px 8px;cursor:pointer}
+.lw-panel-toolbar>button.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+.lw-panel-toolbar input,.lw-panel-toolbar code{flex:1;min-width:0}
+.lw-panel-toolbar code{overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.lw-file{display:flex;flex:1;flex-direction:column;min-height:260px}
+.lw-file .ide-source-editor{flex:1;min-height:220px;overflow:auto}
+.lw-file-name{flex:1;min-width:0;text-align:left;background:none;border:0;color:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;font:inherit}
+.lw-compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.lw-compare pre{overflow:auto;max-height:400px;font-size:12px}
+.lw-compare section{min-width:0;overflow:hidden}
+.lw-compare .ide-source-editor{height:320px;overflow:auto}
+.lw-split-diff{overflow:auto;max-height:420px;background:var(--bg)}
+.lw-split-diff table{width:100%;border-collapse:collapse;font-size:12px}
+.lw-split-diff td{width:50%;padding:0 8px;border-right:1px solid var(--line);vertical-align:top}
+.lw-split-diff pre{margin:0;white-space:pre;font-size:12px;line-height:1.6}
+.lw-split-diff .change td:first-child{background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.lw-split-diff .change td:last-child{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.lw-split-diff .meta{color:var(--muted);background:var(--panel)}
+.lw-terminal{display:flex;flex:1;flex-direction:column;min-height:350px}
+.lw-terminal-screen{min-height:250px;flex:1;background:#101214;padding:4px;overflow:hidden}
+.lw-git-actions{padding:12px;display:flex;gap:8px;flex-direction:column}
+.lw-search-results{overflow:auto}
+.lw-search-results button{display:flex;flex-direction:column;gap:4px;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);padding:10px;text-align:left;cursor:pointer}
+.lw-search-results code{overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px}
+.lw-body .lw-chat{min-width:280px;flex-shrink:1}
+.lw-projects .error-notice{font-size:11px}
+@media(max-width:1100px){.lw-projects{width:190px}.lw-bound{flex-basis:100%}.lw-header>.lw-badge{display:none}}
+@media(max-width:820px){
+  .lw-body{flex-wrap:wrap;overflow:auto}
+  .lw-projects{width:100%;max-height:260px;border-bottom:1px solid var(--line)}
+  .lw-body .lw-chat{flex:1 0 100%!important;min-height:400px}
+  .lw-tools{width:100%;flex:1 0 100%;min-height:400px}
+  .lw-body>.ide-resize-handle{display:none}
+  .lw-start{flex-basis:100%}
+  .lw-composer-actions{flex-wrap:wrap}
+}
 @media (max-width:820px){
   .lw-sidebar{display:none}
   .lw-transcript{padding:14px 16px}

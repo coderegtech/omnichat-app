@@ -9,7 +9,7 @@ const secretDirectories=new Set(['.ssh','.aws','.azure','.gnupg','.docker','secr
 /** Common credential files. They are hidden from listings and searches and need an explicit read override. */
 export function isSecretPath(path:string):boolean {
   const segments=path.toLowerCase().split('/');const name=segments.at(-1)??'';
-  if(segments.slice(0,-1).some(segment=>secretDirectories.has(segment)))return true;
+  if(segments.some(segment=>secretDirectories.has(segment)))return true;
   if(name.startsWith('.env')&&!['.env.example','.env.sample','.env.template'].includes(name))return true;
   return secretNames.has(name)||secretExtension.test(name)||/^credentials?(?:[._-]|$)/.test(name);
 }

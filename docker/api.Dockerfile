@@ -1,5 +1,5 @@
 FROM node:22-bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates python3 make g++ git && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@10.30.3 --activate
 WORKDIR /app
 COPY . .

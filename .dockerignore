@@ -1,6 +1,7 @@
 **/node_modules
 **/.next
 **/.next-production
+**/.next-e2e
 **/dist
 **/.expo
 **/coverage
@@ -10,6 +11,7 @@
 **/*.tsbuildinfo
 **/*.log
 .git
+docker-compose.override.yml
 .env
 .env.*
 **/.env

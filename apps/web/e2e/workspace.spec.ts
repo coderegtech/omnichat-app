@@ -21,6 +21,7 @@ async function mockWorkspace(page:Page,signedIn=true) {
   if(path==='/api/models'||path==='/api/status'||path==='/api/models/refresh')return json(registry);
   if(path==='/api/settings'){if(method==='PATCH')settings={...settings,...req.postDataJSON()};return json(settings);}
   if(['/api/projects','/api/folders','/api/generations','/api/attachments'].includes(path))return json({items:[]});
+  if(['/api/workspace/sessions','/api/workspace/roots'].includes(path))return json({items:[]});
   if(path==='/api/conversations'){
    if(method==='POST'){const now=new Date().toISOString();const body=req.postDataJSON();const c:Conversation={id:randomUUID(),title:body.title||'New conversation',modelId:body.modelId||null,pinned:false,folderId:null,createdAt:now,updatedAt:now};conversations.push(c);return json(c,201);}
    return json({items:conversations});

@@ -6,11 +6,11 @@ import type {Workspace} from '@/lib/store';
 import {Modal} from './ui';
 import * as Dialog from '@radix-ui/react-dialog';
 
-export const workspaceLabels:Record<Workspace,string>={projects:'Projects',chat:'Chat',agent:'Local agent',models:'Models',images:'Image studio',video:'Video studio',music:'Audio studio',speech:'Text to speech',transcription:'Transcription',search:'Web search',files:'Your files',status:'Connection'};
+export const workspaceLabels:Record<Workspace,string>={projects:'Saved projects',chat:'Chat',agent:'Projects',models:'Models',images:'Image studio',video:'Video studio',music:'Audio studio',speech:'Text to speech',transcription:'Transcription',search:'Web search',files:'Your files',status:'Connection'};
 const activities=[
-  {id:'projects',icon:FolderOpen,label:'Projects'},
+  {id:'agent',icon:FolderOpen,label:'Projects'},
   {id:'chat',icon:MessageSquare,label:'Chat'},
-  {id:'agent',icon:Bot,label:'Local agent'},
+  {id:'projects',icon:Files,label:'Saved projects'},
   {id:'models',icon:Layers3,label:'Models'},
   {id:'images',icon:Image,label:'Image studio'},
   {id:'video',icon:Video,label:'Video studio'},
@@ -23,7 +23,7 @@ export function ActivityBar({workspace,navigate,onSearch,onSettings,onConnection
   const select=(id:Workspace)=>{navigate(id);onClose();};
   const navigation=<nav className={`ide-activity ${mobileOpen?'is-open':''}`} aria-label="Main navigation">
     <div className="activity-mobile-heading"><strong>Workspace</strong><button className="icon-button" aria-label="Close navigation" onClick={onClose}><X size={18}/></button></div>
-    {activities.slice(0,3).map(item=><button key={item.id} className={workspace===item.id?'active':''} aria-label={item.label} aria-current={workspace===item.id?'page':undefined} title={item.id==='projects'?'Explorer · Projects':item.label} onClick={()=>select(item.id)}><item.icon size={21}/><span>{item.label}</span></button>)}
+    {activities.slice(0,3).map(item=><button key={item.id} className={workspace===item.id?'active':''} aria-label={item.label} aria-current={workspace===item.id?'page':undefined} title={item.label} onClick={()=>select(item.id)}><item.icon size={21}/><span>{item.label}</span></button>)}
     {onSearch&&<button aria-label="Search project files" title="Search project files" onClick={()=>{onSearch();onClose();}}><Search size={21}/><span>Search project files</span></button>}
     <div className="activity-divider"/>
     {activities.slice(3).map(item=><button key={item.id} className={workspace===item.id?'active':''} aria-label={item.label} aria-current={workspace===item.id?'page':undefined} title={item.label} onClick={()=>select(item.id)}><item.icon size={20}/><span>{item.label}</span></button>)}
@@ -36,7 +36,7 @@ export function ActivityBar({workspace,navigate,onSearch,onSettings,onConnection
 }
 
 export function WorkspaceTabs({tabs,active,onSelect,onClose}:{tabs:Workspace[];active:Workspace;onSelect:(id:Workspace)=>void;onClose:(id:Workspace)=>void}) {
-  return <div className="ide-workspace-tabs" role="tablist" aria-label="Workspace views">{tabs.map((id,index)=><div className={`workspace-tab ${id===active?'active':''}`} key={id}><button role="tab" tabIndex={id===active?0:-1} aria-selected={id===active} onClick={()=>onSelect(id)} onKeyDown={event=>{let next=index;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();onSelect(tabs[next]!);event.currentTarget.parentElement?.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();}}>{id==='projects'?<FolderOpen size={14}/>:id==='chat'?<MessageSquare size={14}/>:id==='agent'?<Bot size={14}/>:<Layers3 size={14}/>}<span>{workspaceLabels[id]}</span></button>{id!=='projects'&&<button className="tab-close" aria-label={`Close ${workspaceLabels[id]} view`} title="Close view" onClick={()=>onClose(id)}><X size={13}/></button>}</div>)}</div>;
+  return <div className="ide-workspace-tabs" role="tablist" aria-label="Workspace views">{tabs.map((id,index)=><div className={`workspace-tab ${id===active?'active':''}`} key={id}><button role="tab" tabIndex={id===active?0:-1} aria-selected={id===active} onClick={()=>onSelect(id)} onKeyDown={event=>{let next=index;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();onSelect(tabs[next]!);event.currentTarget.parentElement?.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();}}>{id==='agent'?<FolderOpen size={14}/>:id==='chat'?<MessageSquare size={14}/>:id==='projects'?<Files size={14}/>:<Layers3 size={14}/>}<span>{workspaceLabels[id]}</span></button>{id!=='agent'&&<button className="tab-close" aria-label={`Close ${workspaceLabels[id]} view`} title="Close view" onClick={()=>onClose(id)}><X size={13}/></button>}</div>)}</div>;
 }
 
 export type IdeCommand={id:string;label:string;detail?:string;shortcut?:string;run:()=>void};

@@ -1,5 +1,10 @@
 # OmniChat
 
+The default **Projects** workspace now supports persistent direct-folder projects and chats,
+Ask/Plan/Agent/Review modes, reviewed disk edits, native terminals and Git actions.
+See the [direct local workspace guide](docs/DIRECT-LOCAL-WORKSPACE.md) for setup,
+permissions and current limits. Project directories are linked in place.
+
 A cross-platform AI workspace for coding projects and chat, backed by your own OmniRoute gateway. Work on imported source copies or linked local folders, review AI file changes, and approve commands in an isolated Docker runner. This repository contains a Next.js web app, Expo native chat app, Electron shell, Fastify API, shared TypeScript packages, and PostgreSQL/Prisma storage.
 
 Start with the [coding workspace guide](docs/CODING-WORKSPACE.md) for project imports, local folder authorization, change publication, and sandbox setup. Coding is available in the web app and Electron shell; the native mobile app currently supports chat.

@@ -38,6 +38,8 @@ export type WorkspaceToolCall =
   | {tool:'delete_file';path:string}
   | {tool:'run_command';program:string;args:string[]};
 export type WorkspaceToolName = WorkspaceToolCall['tool'];
+export type WorkspaceMode = 'ask'|'plan'|'agent'|'review';
+export interface WorkspaceLink {id:string;name:string;root:string;title:string;pinned:boolean;modelId:string|null;mode:WorkspaceMode;updatedAt:string;}
 export type WorkspacePermissionAction = 'read'|'edit'|'delete'|'command';
 export type WorkspacePermissionEffect = 'allow'|'ask'|'deny';
 export interface WorkspacePermissionRule {id:string;effect:'allow'|'deny';action:WorkspacePermissionAction;pattern:string;}
@@ -47,6 +49,8 @@ export interface WorkspaceInstructions {path:string;content:string;characters:nu
 export type WorkspaceEvent =
   | {type:'user';text:string}
   | {type:'assistant';text:string}
+  | {type:'assistant_delta';text:string}
+  | {type:'usage';inputTokens?:number;outputTokens?:number}
   | {type:'context';path:string;lines:number;truncated:boolean}
   | {type:'tool_call';id:string;call:WorkspaceToolCall}
   | {type:'tool_result';id:string;ok:boolean;summary:string;detail?:string;diff?:string}
@@ -54,5 +58,5 @@ export type WorkspaceEvent =
   | {type:'decision';change:WorkspacePendingChange}
   | {type:'error';message:string}
   | {type:'done';reason:'complete'|'awaiting_approval'|'tool_error'|'stopped'|'limit'};
-export interface WorkspaceSessionView {id:string;name:string;root:string;instructions:WorkspaceInstructions|null;index:string[];rules:WorkspacePermissionRule[];pending:WorkspacePendingChange[];transcript:WorkspaceEvent[];running:boolean;commandsEnabled:boolean;createdAt:string;}
+export interface WorkspaceSessionView {id:string;name:string;root:string;title:string;pinned:boolean;modelId:string|null;mode:WorkspaceMode;memory:string;instructions:WorkspaceInstructions|null;index:string[];rules:WorkspacePermissionRule[];pending:WorkspacePendingChange[];transcript:WorkspaceEvent[];running:boolean;commandsEnabled:boolean;createdAt:string;}
 export interface WorkspaceTreeEntry {path:string;name:string;type:'file'|'dir';size?:number;secret?:boolean;}
