@@ -80,6 +80,20 @@ else {
     });
     browserSession.webRequest.onHeadersReceived((details, callback) => callback({ responseHeaders: { ...details.responseHeaders, 'Content-Security-Policy': [contentSecurityPolicy(address.origin, !app.isPackaged)] } }));
 
+    ipcMain.handle('omnichat:pick-project-folder', async event => {
+      trusted(event);
+      const result=await dialog.showOpenDialog(mainWindow!,{title:'Add Local Project',properties:['openDirectory']});
+      return result.canceled?null:result.filePaths[0]??null;
+    });
+    ipcMain.handle('omnichat:open-project-folder', async (event,input:unknown) => {
+      trusted(event);
+      if(typeof input!=='string'||input.length>1024||!path.isAbsolute(input)||/[\x00-\x1f]/.test(input))throw new Error('Invalid folder path.');
+      const {stat}=await import('node:fs/promises');
+      if(!(await stat(input)).isDirectory())throw new Error('Select a folder.');
+      const answer=await dialog.showMessageBox(mainWindow!,{title:'Open project folder',message:'Open this folder?',detail:input,buttons:['Cancel','Open'],cancelId:0,defaultId:0});
+      if(answer.response!==1)return false;
+      const error=await shell.openPath(input);if(error)throw new Error(error);return true;
+    });
     ipcMain.handle('omnichat:save-text', async (event, input: unknown) => {
       trusted(event); const value = savePayload(input);
       const result = await dialog.showSaveDialog(mainWindow!, { title: 'Export conversation', defaultPath: `${value.name}.${value.format === 'json' ? 'json' : 'md'}`, filters: [{ name: value.format === 'json' ? 'JSON' : 'Markdown', extensions: [value.format === 'json' ? 'json' : 'md'] }] });

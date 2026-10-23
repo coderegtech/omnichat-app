@@ -25,3 +25,38 @@ export type CodingAction =
 export interface CodingRun {id:string;projectId:string;requestId:string;prompt:string;modelId:string;status:'running'|'awaiting_review'|'applied'|'complete'|'cancelled'|'error'|'rejected';summary:string;actions:CodingAction[];error?:string|null;createdAt:string;updatedAt:string;}
 export interface CodingCommand {id:string;projectId:string;requestId:string;program:'node'|'npm'|'pnpm';args:string[];status:'queued'|'running'|'complete'|'error'|'cancelled';output:string;exitCode?:number|null;error?:string|null;createdAt:string;updatedAt:string;}
 export interface CodingProjectDetail {project:CodingProject;files:CodingFile[];runs:CodingRun[];}
+
+/** Live local workspace: the model reads a bound folder on demand and every write waits for a permission decision. */
+export type WorkspaceToolCall =
+  | {tool:'list_dir';path:string;depth?:number}
+  | {tool:'read_file';path:string;startLine?:number;endLine?:number}
+  | {tool:'search_text';query:string;glob?:string}
+  | {tool:'git_status'}
+  | {tool:'git_diff';path?:string}
+  | {tool:'edit_file';path:string;oldText:string;newText:string}
+  | {tool:'write_file';path:string;content:string}
+  | {tool:'delete_file';path:string}
+  | {tool:'run_command';program:string;args:string[]};
+export type WorkspaceToolName = WorkspaceToolCall['tool'];
+export type WorkspaceMode = 'ask'|'plan'|'agent'|'review';
+export interface WorkspaceLink {id:string;name:string;root:string;title:string;pinned:boolean;modelId:string|null;mode:WorkspaceMode;updatedAt:string;}
+export type WorkspacePermissionAction = 'read'|'edit'|'delete'|'command';
+export type WorkspacePermissionEffect = 'allow'|'ask'|'deny';
+export interface WorkspacePermissionRule {id:string;effect:'allow'|'deny';action:WorkspacePermissionAction;pattern:string;}
+export interface WorkspacePermissionDecision {effect:WorkspacePermissionEffect;reason:string;ruleId?:string;}
+export interface WorkspacePendingChange {id:string;kind:'edit'|'write'|'delete'|'command';path?:string;diff?:string;program?:string;args?:string[];status:'pending'|'applied'|'rejected'|'failed';error?:string;output?:string;createdAt:string;}
+export interface WorkspaceInstructions {path:string;content:string;characters:number;truncated:boolean;}
+export type WorkspaceEvent =
+  | {type:'user';text:string}
+  | {type:'assistant';text:string}
+  | {type:'assistant_delta';text:string}
+  | {type:'usage';inputTokens?:number;outputTokens?:number}
+  | {type:'context';path:string;lines:number;truncated:boolean}
+  | {type:'tool_call';id:string;call:WorkspaceToolCall}
+  | {type:'tool_result';id:string;ok:boolean;summary:string;detail?:string;diff?:string}
+  | {type:'pending';change:WorkspacePendingChange}
+  | {type:'decision';change:WorkspacePendingChange}
+  | {type:'error';message:string}
+  | {type:'done';reason:'complete'|'awaiting_approval'|'tool_error'|'stopped'|'limit'};
+export interface WorkspaceSessionView {id:string;name:string;root:string;title:string;pinned:boolean;modelId:string|null;mode:WorkspaceMode;memory:string;instructions:WorkspaceInstructions|null;index:string[];rules:WorkspacePermissionRule[];pending:WorkspacePendingChange[];transcript:WorkspaceEvent[];running:boolean;commandsEnabled:boolean;createdAt:string;}
+export interface WorkspaceTreeEntry {path:string;name:string;type:'file'|'dir';size?:number;secret?:boolean;}

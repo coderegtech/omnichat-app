@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { OmniRoute, normalizeModel } from './index.js';
+import { OmniRoute, normalizeModel, gatewayFailure } from './index.js';
 
 describe('OmniRoute protocol adapter',()=>{
   it('preserves unknown metadata and explicitly labels the untyped chat compatibility rule',()=>{
@@ -38,5 +38,11 @@ describe('OmniRoute protocol adapter',()=>{
   it('sanitizes gateway errors without exposing upstream text or credentials',async()=>{
     const gateway=new OmniRoute({baseUrl:'https://gateway.example/v1',apiKey:'test-only-key',fetch:async()=>new Response('secret upstream details',{status:401})});
     const result=await gateway.discover();expect(result.connection.error).not.toContain('secret');expect(result.models).toEqual([]);
+  });
+  it('explains rate limits with the gateway reason and reset time',async()=>{
+    const limited=new Response(JSON.stringify({error:{message:'[codex] All accounts rate limited (reset after 40m 35s)',retry_after:2435}}),{status:429,headers:{'retry-after':'2435'}});
+    expect(await gatewayFailure(limited)).toBe('OmniRoute is rate limited: [codex] All accounts rate limited (reset after 40m 35s). Try again in about 41 minutes, or choose a model from another provider.');
+    expect(await gatewayFailure(new Response('<html>busy</html>',{status:503}))).toBe('OmniRoute returned HTTP 503. Check its provider diagnostics.');
+    expect(await gatewayFailure(new Response(JSON.stringify({error:'bad\nmodel'}),{status:400}))).toBe('OmniRoute returned HTTP 400: bad model');
   });
 });

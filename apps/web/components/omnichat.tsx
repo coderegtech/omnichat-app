@@ -12,6 +12,7 @@ import {useUi,type Workspace} from '@/lib/store';
 import {AuthDialog} from './auth';
 import {Chat} from './chat';
 import {CodingWorkspace,CodingWelcome} from './coding-workspace';
+import {LocalWorkspace} from './local-workspace';
 import {ModelBrowser,ModelPicker} from './models';
 import {ConversationSettings,SettingsDialog} from './settings';
 import {Connection,FilesWorkspace,SearchWorkspace,SignedOutWorkspace,Studio,WorkspaceHeading} from './workspaces';
@@ -45,17 +46,17 @@ export function OmniChat(){
  const coding=useCodingIde();
  const [sidebarWidth,setSidebarWidth]=useState(258);
  const [palette,setPalette]=useState<'commands'|'files'|null>(null);
- const [tabs,setTabs]=useState<Workspace[]>(['projects']);
- const [mounted,setMounted]=useState<Workspace[]>(['projects']);
+ const [tabs,setTabs]=useState<Workspace[]>(['agent']);
+ const [mounted,setMounted]=useState<Workspace[]>(['agent']);
  useEffect(()=>{setTabs(items=>items.includes(workspace)?items:[...items,workspace]);setMounted(items=>items.includes(workspace)?items:[...items,workspace]);},[workspace]);
  useEffect(()=>{
    const activeWorkspace=useUi.getState().workspace;
-   const initial:Workspace[]=activeWorkspace==='projects'?['projects']:['projects',activeWorkspace];
+   const initial:Workspace[]=activeWorkspace==='agent'?['agent']:['agent',activeWorkspace];
    setTabs(initial);setMounted(initial);setQuery('');setDebouncedQuery('');setFolderFilter(null);
    setDetailsOpen(false);setEditingConversation(undefined);setDeleteTarget(null);setFolderOpen(false);
    setSettingsOpen(false);setPalette(null);setActionError(null);setFolderName('');
  },[user?.id]);
- const closeView=useCallback((id:Workspace)=>{if(id==='projects')return;setTabs(items=>items.filter(item=>item!==id));if(workspace===id)setWorkspace('projects');},[workspace,setWorkspace]);
+ const closeView=useCallback((id:Workspace)=>{if(id==='agent')return;setTabs(items=>items.filter(item=>item!==id));if(workspace===id)setWorkspace('agent');},[workspace,setWorkspace]);
  const toggleContextSidebar=useCallback(()=>{if(workspace==='projects')useCodingIde.getState().toggleExplorer();else setCollapsed(value=>!value);},[workspace]);
  useEffect(()=>{
    const keydown=(event:KeyboardEvent)=>{
@@ -72,7 +73,8 @@ export function OmniChat(){
    window.addEventListener('keydown',keydown);return()=>window.removeEventListener('keydown',keydown);
  },[newChat,workspace,closeView,toggleContextSidebar]);
  const commands:IdeCommand[]=[
-   {id:'project',label:'View: Projects',run:()=>setWorkspace('projects')},
+   {id:'project',label:'View: Projects',run:()=>setWorkspace('agent')},
+   {id:'saved-projects',label:'View: Saved projects',run:()=>setWorkspace('projects')},
    {id:'chat',label:'Chat: New conversation',shortcut:'Ctrl / ⌘ K',run:newChat},
    {id:'history',label:'View: Conversation history',run:()=>{setWorkspace('chat');setCollapsed(false);}},
    {id:'models',label:'AI: Browse models and providers',run:()=>setWorkspace('models')},
@@ -93,13 +95,13 @@ export function OmniChat(){
  const quickFiles:IdeCommand[]=coding.files.map(file=>({id:file.path,label:file.path,detail:coding.projectName,run:()=>{setWorkspace('projects');coding.openFile(file.path);}}));
  const connectionLabel=!user?'Sign in to connect':connection?.status==='connected'?'Gateway connected':connection?.status==='unconfigured'?'Gateway not configured':connection?.status==='disconnected'?'Gateway disconnected':'Checking connection';
  const selectedModel=registry.data?.models.find(model=>model.id===modelId);
- const extraWorkspace=(id:Workspace)=>!user?<SignedOutWorkspace onSignIn={()=>setAuthOpen(true)}/>:id==='models'?<div className="workspace-content"><WorkspaceHeading eyebrow="OMNIROUTE INTEGRATIONS" title="Find your thinking partner." description="Models and capabilities reported by your connected gateway." action={<button className="button secondary" onClick={()=>refresh.mutate()} disabled={refresh.isPending}>Refresh discovery</button>}/><ErrorNotice message={registry.error&&errorMessage(registry.error)}/><ModelBrowser registry={registry.data} settings={settings.data} onSelect={()=>setWorkspace('chat')}/></div>:id==='status'?<Connection registry={registry.data} refreshing={refresh.isPending||registry.isFetching} onRefresh={()=>refresh.mutate()} error={refresh.error||registry.error}/>:id==='files'?<FilesWorkspace/>:id==='search'?<SearchWorkspace registry={registry.data}/>:<div className="studio-container">{['music','speech','transcription'].includes(id)&&<div className="studio-tabs">{(['music','speech','transcription'] as const).map(kind=><button className={id===kind?'active':''} onClick={()=>setWorkspace(kind)} key={kind}>{workspaceLabels[kind]}</button>)}</div>}<Studio kind={id as 'images'|'video'|'music'|'speech'|'transcription'} registry={registry.data}/></div>;
+ const extraWorkspace=(id:Workspace)=>!user?<SignedOutWorkspace onSignIn={()=>setAuthOpen(true)}/>:id==='models'?<div className="workspace-content"><WorkspaceHeading eyebrow="OMNIROUTE INTEGRATIONS" title="Find your thinking partner." description="Models and capabilities reported by your connected gateway." action={<button className="button secondary" onClick={()=>refresh.mutate()} disabled={refresh.isPending}>Refresh discovery</button>}/><ErrorNotice message={registry.error&&errorMessage(registry.error)}/><ModelBrowser registry={registry.data} settings={settings.data} onSelect={()=>setWorkspace('chat')}/></div>:id==='status'?<Connection registry={registry.data} refreshing={refresh.isPending||registry.isFetching} onRefresh={()=>refresh.mutate()} error={refresh.error||registry.error}/>:id==='agent'?<LocalWorkspace registry={registry.data}/>:id==='files'?<FilesWorkspace/>:id==='search'?<SearchWorkspace registry={registry.data}/>:<div className="studio-container">{['music','speech','transcription'].includes(id)&&<div className="studio-tabs">{(['music','speech','transcription'] as const).map(kind=><button className={id===kind?'active':''} onClick={()=>setWorkspace(kind)} key={kind}>{workspaceLabels[kind]}</button>)}</div>}<Studio kind={id as 'images'|'video'|'music'|'speech'|'transcription'} registry={registry.data}/></div>;
  return <div className="ide-shell" style={{'--conversation-sidebar-width':`${sidebarWidth}px`} as CSSProperties}>
    <a className="skip-link" href="#main-content">Skip to content</a>
    <header className="ide-titlebar">
      <button className="icon-button ide-mobile-menu" aria-label="Open navigation" onClick={toggleSidebar}><MenuIcon size={18}/></button>
      <button className="ide-brand" aria-label="OmniChat home" onClick={()=>setWorkspace('projects')}><Brand small/><strong>OmniChat</strong><span> / OmniRoute</span></button>
-     <button className="ide-command-entry" aria-label="Open command palette" title="Command palette (Ctrl/Cmd+Shift+P)" onClick={()=>setPalette('commands')}><Search size={14}/><span>{coding.projectName||'Search commands'}</span><kbd>⌘ / Ctrl ⇧ P</kbd></button>
+     <button className="ide-command-entry" aria-label="Open command palette" title="Command palette (Ctrl/Cmd+Shift+P)" onClick={()=>setPalette('commands')}><Search size={14}/><span>{workspace==='projects'&&coding.projectName||'Search commands'}</span><kbd>⌘ / Ctrl ⇧ P</kbd></button>
      <div className="ide-title-actions"><ModelPicker registry={registry.data} settings={settings.data} requireAuth={requireAuth}/>{(workspace==='chat'||(workspace==='projects'&&coding.ready))&&<button className="icon-button" aria-label="Toggle sidebar" title="Toggle sidebar (Ctrl/Cmd+B)" onClick={toggleContextSidebar}><PanelLeftOpen size={16}/></button>}{workspace==='projects'&&coding.ready&&<button className="icon-button" aria-label="Toggle bottom panel" title="Toggle bottom panel (Ctrl/Cmd+J)" onClick={coding.togglePanel}><PanelBottom size={16}/></button>}{user?<Menu label="Account options"><MenuItem onSelect={()=>setSettingsOpen(true)}><Settings2 size={14}/>Preferences</MenuItem><MenuItem onSelect={()=>logout.mutate()}><LogOut size={14}/>Sign out</MenuItem></Menu>:<button className="button sign-in-button" onClick={()=>setAuthOpen(true)}>Sign in</button>}</div>
    </header>
    <div className="ide-body">
@@ -114,12 +116,12 @@ export function OmniChat(){
  {actionError&&<div className="global-notice"><ErrorNotice message={actionError}/><button className="icon-button" aria-label="Dismiss error" onClick={()=>setActionError(null)}><X size={14}/></button></div>}{me.error&&!(me.error instanceof ApiError&&me.error.status===401)&&<div className="global-notice"><ErrorNotice message={`The application server could not be reached. ${errorMessage(me.error)}`}/><button className="text-button" onClick={()=>void me.refetch()}>Retry</button></div>}
 
        {workspace==='chat'&&<div className="ide-chat-heading"><div><MessageSquare size={15}/><strong>{current?.title||'New conversation'}</strong><span>{selectedModel?.provider||'Choose a model'}</span></div><div><button className="icon-button" aria-label="Show conversation history" title="Show conversation history" onClick={()=>setCollapsed(false)}><HistoryIcon/></button>{conversationId&&<><button className="icon-button" aria-label="Conversation details" title="Conversation details" onClick={()=>{setEditingConversation(current);setDetailsOpen(true);}}><SlidersHorizontal size={16}/></button><Menu label="Export conversation"><MenuItem onSelect={()=>void exportConversation('markdown')}><ArrowDownToLine size={14}/>Export Markdown</MenuItem><MenuItem onSelect={()=>void exportConversation('json')}><ArrowDownToLine size={14}/>Export JSON</MenuItem></Menu></>}</div></div>}
-       <WorkspacePane active={workspace==='projects'}>{user?<CodingWorkspace key={user.id} registry={registry.data} visible={workspace==='projects'}/>:<CodingWelcome onSignIn={()=>setAuthOpen(true)}/>}</WorkspacePane>
+       {mounted.includes('projects')&&<WorkspacePane active={workspace==='projects'}>{user?<CodingWorkspace key={user.id} registry={registry.data} visible={workspace==='projects'}/>:<CodingWelcome onSignIn={()=>setAuthOpen(true)}/>}</WorkspacePane>}
        {mounted.includes('chat')&&<WorkspacePane active={workspace==='chat'}><Chat user={user} registry={registry.data} settings={settings.data} requireAuth={requireAuth} visible={workspace==='chat'}/></WorkspacePane>}
        {mounted.filter(id=>id!=='projects'&&id!=='chat').map(id=><WorkspacePane key={id} active={workspace===id}>{extraWorkspace(id)}</WorkspacePane>)}
      </main>
    </div>
-   <footer className="ide-statusbar" aria-label="Workspace status"><button onClick={()=>user?setWorkspace('status'):setAuthOpen(true)}><span className={`status-orb ${connection?.status==='connected'?'online':''}`}/>{connectionLabel}</button><span className="status-workspace">{coding.projectName||workspaceLabels[workspace]}</span><div className="status-spacer"/>{workspace==='projects'&&coding.ready&&<><span className="status-file" title={coding.activeFile||''}>{coding.activeFile||'No file selected'}</span>{coding.activeFile&&<span className="status-cursor">Ln {coding.cursor.line}, Col {coding.cursor.column} · {coding.language}</span>}<span>{coding.dirtyCount?`${coding.dirtyCount} unsaved`:'Workspace saved'}</span></>}<span className="status-provider" title={selectedModel?.id}>{selectedModel?`${selectedModel.provider} / ${selectedModel.name}`:'No model selected'}</span></footer>
+   <footer className="ide-statusbar" aria-label="Workspace status"><button onClick={()=>user?setWorkspace('status'):setAuthOpen(true)}><span className={`status-orb ${connection?.status==='connected'?'online':''}`}/>{connectionLabel}</button><span className="status-workspace">{workspace==='projects'&&coding.projectName||workspaceLabels[workspace]}</span><div className="status-spacer"/>{workspace==='projects'&&coding.ready&&<><span className="status-file" title={coding.activeFile||''}>{coding.activeFile||'No file selected'}</span>{coding.activeFile&&<span className="status-cursor">Ln {coding.cursor.line}, Col {coding.cursor.column} · {coding.language}</span>}<span>{coding.dirtyCount?`${coding.dirtyCount} unsaved`:'Workspace saved'}</span></>}<span className="status-provider" title={selectedModel?.id}>{selectedModel?`${selectedModel.provider} / ${selectedModel.name}`:'No model selected'}</span></footer>
    <CommandPalette mode={palette} onClose={()=>setPalette(null)} commands={commands} files={quickFiles}/>
 <AuthDialog open={authOpen} onOpenChange={setAuthOpen}/><SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings.data} registry={registry.data}/><ConversationSettings open={detailsOpen} onOpenChange={setDetailsOpen} conversation={editingConversation} registry={registry.data} folders={folders.data?.items||[]}/><Modal open={folderOpen} onOpenChange={setFolderOpen} title="A place for related ideas" description="Create a folder to organize your conversations."><form className="stack" onSubmit={e=>{e.preventDefault();createFolder.mutate();}}><Field label="Folder name"><input autoFocus value={folderName} onChange={e=>setFolderName(e.target.value)} placeholder="e.g. Weekend projects" maxLength={80} required/></Field><ErrorNotice message={createFolder.error&&errorMessage(createFolder.error)}/><button className="button primary" disabled={createFolder.isPending}>{createFolder.isPending?<Busy label="Creating"/>:'Create folder'}</button></form></Modal><Modal open={!!deleteTarget} onOpenChange={v=>!v&&setDeleteTarget(null)} title={`Delete ${deleteTarget?.type==='folders'?'folder':'conversation'}?`} description={deleteTarget?.type==='folders'?'Conversations will be kept outside this folder.':'This conversation and its branches will be removed from your history.'}><p className="delete-name">{deleteTarget?.name}</p><ErrorNotice message={remove.error&&errorMessage(remove.error)}/><div className="dialog-footer"><button className="button secondary" onClick={()=>setDeleteTarget(null)}>Keep it</button><button className="button danger-button" disabled={remove.isPending} onClick={()=>remove.mutate()}>{remove.isPending?<Busy label="Deleting"/>:'Delete'}</button></div></Modal>
 

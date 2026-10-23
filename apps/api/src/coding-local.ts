@@ -24,7 +24,7 @@ function configRoots(email:string) {
   try {return rootSchema.parse(JSON.parse(process.env.CODING_LOCAL_PROJECTS||'[]')).filter(item=>item.email.toLowerCase()===email.toLowerCase());}
   catch {throw new HttpError(503,'LOCAL_CONFIG','The local-folder access configuration is invalid. Ask the API operator to check CODING_LOCAL_PROJECTS.');}
 }
-async function allowedRoots(email:string) {
+export async function allowedRoots(email:string) {
   const entries=[];
   for(const item of configRoots(email)) {
     if(!isAbsolute(item.path))continue;
@@ -50,7 +50,7 @@ async function safeTarget(root:string,path:string,allowMissing=false) {
   }
   return current;
 }
-async function authorizedFolder(path:string,email:string) {
+export async function authorizedFolder(path:string,email:string) {
   if(!isAbsolute(path))throw new HttpError(400,'LOCAL_PATH','Choose an absolute folder path on the API computer.');
   let canonical:string;
   try {canonical=await realpath(resolve(path));}catch {throw new HttpError(404,'LOCAL_NOT_FOUND','The local folder could not be found.');}

@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-production/
+.next-e2e/
 dist/
 release/
 out/
@@ -22,3 +23,4 @@ data/
 *.p12
 *.mobileprovision
 work/
+docker-compose.override.yml

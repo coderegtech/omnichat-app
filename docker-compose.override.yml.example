@@ -1,0 +1,13 @@
+# Copy to docker-compose.override.yml and replace the email and source path.
+# The source folder must already exist. This mount edits the original files.
+services:
+  api:
+    environment:
+      CODING_LOCAL_PROJECTS: >-
+        [{"email":"YOUR_LOGIN_EMAIL","path":"/projects/local","label":"Local project"}]
+    volumes:
+      - type: bind
+        source: "C:/Projects/your-project"
+        target: /projects/local
+        bind:
+          create_host_path: false

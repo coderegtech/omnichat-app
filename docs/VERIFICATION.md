@@ -1,6 +1,27 @@
 # Verification and delivery status
 
-Verified on Windows with Docker Desktop, updated 19 October 2026. This is a functional implementation with local runtime verification, not a signed production release or a claim that every feature in the original brief is complete.
+Verified on Windows, updated 21 October 2026. Earlier Docker results are dated below. This is a functional implementation with local runtime verification, not a signed production release or a claim that every feature in the original brief is complete.
+
+## Direct local workspace verification — 21 October
+
+Implemented on `codex/ai-coding-workspace`. Linked source folders remain in their original locations. See [setup and operating limits](DIRECT-LOCAL-WORKSPACE.md) and the [initial gap analysis](LOCAL-WORKSPACE-PLAN.md).
+
+| Command or check | Result and scope |
+| --- | --- |
+| `pnpm test` | 78 passed; 32 opt-in database/Docker cases skipped. Covers existing functionality plus durable workspace state, ownership, modes, stale edits, concurrent saves and execution. |
+| Final targeted workspace regressions | 25 passed after the last credential-isolation and instruction-file hard-link changes. Includes one additional security case beyond the full-suite run above. |
+| `pnpm --filter @omnichat/desktop test` | 3 security tests passed. The native picker implementation was compiled but its OS dialog was not manually exercised. |
+| `pnpm typecheck` | Passed across all packages, including API, web, mobile and desktop, after the final security changes. |
+| `NEXT_BUILD_DIR=.next-production pnpm build` | Passed API TypeScript, optimized Next.js build and Electron main/preload compilation. No signed installer was produced. |
+| Chromium browser suite | All 17 tests passed on isolated port 3217 with `NEXT_BUILD_DIR=.next-e2e`. Projects now opens the direct local workspace by default; imported projects remain under Saved projects. Existing chat and imported-project flows remain covered. Fixtures cover the default entry point, restoring local chats, reviewing before saving, read-only modes, explicit Git approval, project search, new chats and phone layout. API/provider responses are mocked. |
+| Native process checks | Real Windows terminal startup, output, interruption and confirmed cleanup passed. Real Node command output/cancellation passed. These use disposable project directories. |
+| Git checks | Real disposable repositories cover staging, commits, commit comparison, secret-file rejection and dirty-branch protection. No remote push/pull or changes to the user's Git history were performed. |
+| Docker deployment follow-up | Rebuilt web/API images and replaced only those two services with `docker compose up -d --no-deps --wait api web`. Both services are healthy; the web page on localhost:3210 and API health on localhost:4010 return HTTP 200. The existing PostgreSQL container and application volumes were retained. |
+| Production-page browser checks | All 3 local-workspace browser cases passed against the rebuilt server on localhost:3210 with API fixtures. This verifies the served default Projects screen, saved-chat UI, reviewed edits and phone layout, not live provider or filesystem integration through the production UI. |
+
+No application database migration is needed. The existing database and uploaded data were preserved. Local project metadata and bounded conversation state use the configured application upload directory; back up its `workspace-state` subdirectory.
+
+Not revalidated in this increment: real database integration, live provider generation, authenticated remote Git operations, native folder-dialog interaction or macOS/Linux native behavior. Image attachments and message editing/regeneration remain in ordinary chat; they are not unified into local-agent chat. Terminal commands use an explicit review form, so full-screen interactive applications are outside this implementation.
 
 ## IDE redesign verification — 19 October
 

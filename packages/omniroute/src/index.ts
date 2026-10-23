@@ -7,6 +7,24 @@ export interface GatewayConfig { baseUrl: string; apiKey?: string; allowNoAuth?:
 export class GatewayError extends Error {
   constructor(public code: string, message: string, public status = 502) { super(message); }
 }
+
+/** Explain a failed gateway response using its own short error text and Retry-After, never raw bodies. */
+export async function gatewayFailure(response: Response): Promise<string> {
+  let detail = '';
+  let retryAfter = Number(response.headers.get('retry-after'));
+  try {
+    const text = (await response.text()).slice(0, 4096);
+    const body = JSON.parse(text) as {error?: {message?: unknown; retry_after?: unknown} | string; message?: unknown};
+    const raw = typeof body.error === 'string' ? body.error : body.error?.message ?? body.message;
+    if (typeof raw === 'string') detail = raw.replace(/[\x00-\x1f\x7f]+/g, ' ').trim().slice(0, 240);
+    if (!Number.isFinite(retryAfter) || retryAfter <= 0) retryAfter = Number(typeof body.error === 'object' ? body.error?.retry_after : undefined);
+  } catch { /* Non-JSON or unreadable bodies keep the generic explanation. */ }
+  if (response.status === 429) {
+    const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? ` Try again in about ${retryAfter < 90 ? `${Math.ceil(retryAfter)} seconds` : `${Math.ceil(retryAfter / 60)} minutes`}, or choose a model from another provider.` : ' Try again later, or choose a model from another provider.';
+    return `OmniRoute is rate limited${detail ? `: ${detail.replace(/[.!]+$/, '')}.` : '.'}${wait}`;
+  }
+  return detail ? `OmniRoute returned HTTP ${response.status}: ${detail}` : `OmniRoute returned HTTP ${response.status}. Check its provider diagnostics.`;
+}
 const capabilities: Capability[] = ['chat','vision','tools','reasoning','streaming','temperature','images','imageEdits','video','music','search','embeddings','transcription','speech'];
 const stringList = (value: unknown): string[] | undefined => Array.isArray(value) && value.every(v => typeof v === 'string') ? value : undefined;
 const positiveNumber = (value: unknown): number | undefined => typeof value === 'number' && value > 0 && Number.isFinite(value) ? value : undefined;
@@ -60,8 +78,8 @@ export class OmniRoute {
     try { response = await this.fetcher(`${this.base}${path}`, {...init, headers:{...this.headers(),...init.headers}, signal:init.signal ?? AbortSignal.timeout(15_000)}); }
     catch (error) { if (init.signal?.aborted) throw error; throw new GatewayError('GATEWAY_UNREACHABLE','OmniRoute could not be reached. Check the backend gateway URL.'); }
     if (!response.ok) {
-      await response.body?.cancel();
-      throw new GatewayError(`GATEWAY_${response.status}`, response.status === 401 || response.status === 403 ? 'OmniRoute rejected the configured endpoint key.' : `OmniRoute returned HTTP ${response.status}. Check its provider diagnostics.`, response.status === 429 ? 429 : 502);
+      if (response.status === 401 || response.status === 403) {await response.body?.cancel();throw new GatewayError(`GATEWAY_${response.status}`,'OmniRoute rejected the configured endpoint key.',502);}
+      throw new GatewayError(`GATEWAY_${response.status}`, await gatewayFailure(response), response.status === 429 ? 429 : 502);
     }
     return response;
   }

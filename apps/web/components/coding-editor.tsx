@@ -32,10 +32,11 @@ type Props = {
   onCursorChange: (cursor: {line: number; column: number}) => void;
   revealLine?: {line: number; token: number};
   active?: boolean;
+  readOnly?: boolean;
 };
 
 /** CodeMirror is loaded only with the Projects workspace bundle. File contents remain controlled drafts. */
-export function CodingEditor({path, value, onChange, onCursorChange, revealLine, active=true}: Props) {
+export function CodingEditor({path, value, onChange, onCursorChange, revealLine, active=true,readOnly=false}: Props) {
   const ref = useRef<ReactCodeMirrorRef>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   useEffect(()=>{
@@ -81,6 +82,7 @@ export function CodingEditor({path, value, onChange, onCursorChange, revealLine,
     <CodeMirror
       ref={ref}
       value={value}
+      readOnly={readOnly}
       height="100%"
       theme={theme}
       extensions={extensions}

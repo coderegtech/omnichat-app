@@ -46,6 +46,7 @@
       "esbuild",
       "sharp",
       "electron",
+      "node-pty",
       "@swc/core"
     ],
     "overrides": {
