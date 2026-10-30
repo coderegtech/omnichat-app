@@ -13,6 +13,20 @@ The web workspace now includes an IDE-style activity rail, workspace/file tabs, 
 
 The product uses real authenticated API requests. It has no demo providers, fabricated responses, or hard-coded conversation history. Test fixtures run only in test code. Model discovery is a catalogue, **not** a provider health guarantee.
 
+## Screenshots
+
+| Projects | Chat |
+| --- | --- |
+| ![Projects](docs/screenshots/02-projects.png) | ![Chat](docs/screenshots/03-chat.png) |
+
+| Models | Image studio |
+| --- | --- |
+| ![Models](docs/screenshots/04-models.png) | ![Image studio](docs/screenshots/05-image-studio.png) |
+
+| Preferences | Signed out |
+| --- | --- |
+| ![Preferences](docs/screenshots/06-preferences.png) | ![Signed out](docs/screenshots/01-signed-out.png) |
+
 ## Run locally
 
 Requirements: Node.js 22 or later, pnpm 10.30.3, Docker Desktop with Linux containers, and an OmniRoute installation reachable by the API.
